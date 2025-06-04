@@ -3,42 +3,51 @@ import Login from '../Login';
 import { useState, useEffect, useRef, use } from 'react';
 import TrackInfo from '../TrackInfo';
 import { getAccessToken } from '../../auth';
-import { axios } from 'axios';
+import axios from 'axios';
+import Nav from '../Nav';
 
 function App() {
+  const hasRun = useRef(false);
+
   const [token, setToken] = useState<string | null>(null);
-  const hasRun = useRef(false); // Prevents the effect from running multiple times  
- 
-  useEffect(() => { 
-    if(hasRun.current) return;
-    hasRun.current = true; // Set the flag to true after the first run
-    // Check if the token is already set in localStorage
-    getToken(); 
-  }, []); 
+  const [userInfo, setUserInfo] = useState<string | null>(null);
+
+  // useRef to track if the effect has run to prevent multiple executions
+  // This is useful to ensure that the token retrieval logic runs only once 
+  const clientId = import.meta.env.VITE_CLIENT_ID;
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code"); 
+
+  useEffect(() => {
+    if (!hasRun.current && code && !token) {
+      hasRun.current = true; // Set the flag to true to prevent re-running 
+      getToken();
+    }
+    if(token){
+      getUserInfo(token);
+    }
+   }, [token]);
 
   const getToken = async () => {
-    const clientId = import.meta.env.VITE_CLIENT_ID;
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
     if (code) {
       const accessToken = await getAccessToken(clientId, code);
       setToken(accessToken);
-      await getUserInfo(accessToken);
     }
   }
   
-  const getUserInfo = async (accessToken: string) => {
-    const {data} = await axios.get("https://api.spotify.com/v1/me", {
+  const getUserInfo = async (token: string) => {
+    const { data } = await axios.get("https://api.spotify.com/v1/me", {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
       }
     });
-    console.log("User Info:", data);
-    return data;
+    console.log("Spotify User Info Response:", data);
+    console.log("Images array:", data.images);
+    console.log("Token used:", token);
+    setUserInfo(data.images[0]?.url || null);
   }
-
-  const auth = !token ? <Login /> : <TrackInfo />;
+  const auth = !token ? <Login /> : <><Nav userInfo={userInfo} isLoggedIn={!!token}/><TrackInfo /></>;
 
   return <>{auth}</>;
 }
