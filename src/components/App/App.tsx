@@ -1,10 +1,10 @@
 import './App.css';
-import Login from '../Login';
+import Login from '../Login/Login';
 import { useState, useEffect, useRef, use } from 'react';
-import TrackInfo from '../TrackInfo';
+import TrackInfo from '../TrackInfo/TrackInfo';
 import { getAccessToken } from '../../auth';
 import axios from 'axios';
-import Nav from '../Nav';
+import Nav from '../Nav/Nav';
 
 function App() {
   const hasRun = useRef(false);
