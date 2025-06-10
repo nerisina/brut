@@ -1,12 +1,13 @@
 import styled from "styled-components"; 
 
 export const Contianer = styled.div`
-  display: flex;
-  justify-content:center;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  `;
+    display: flex;
+    border-top: 2px solid #000;
+    justify-content: space-around;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+`;
 
 export const TrackView = styled.div`
 display:flex;
@@ -15,8 +16,6 @@ justify-content: space-between;
 `;
 
 export const Side = styled.div`
-    display: flex;
-    flex-direction: columns;
     min-width;30vw;
     position: sticky;
     border-left: 2px solid #000;

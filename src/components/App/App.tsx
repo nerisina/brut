@@ -1,11 +1,10 @@
-import './App.css';
 import Login from '../Login/Login';
 import { useState, useEffect, useRef } from 'react';
 import TrackInfo from '../TrackInfo/TrackInfo';
 import { getAccessToken } from '../../auth';
 import axios from 'axios';
 import Nav from '../Nav/Nav';
-import { Sidebar } from '../Sidebar/Sidebar';
+import Sidebar from '../Sidebar/Sidebar';
 import { Contianer, TrackView, Side } from './styles';
 
 function App() {
@@ -29,7 +28,7 @@ function App() {
     }
     if(token){
       getUserInfo(token);
-      getPlaylists(token, userId);
+      getPlaylists(userId);
     }
    }, [token, userId]);
 
@@ -51,14 +50,15 @@ function App() {
     setUserInfo(data.images[0]?.url || null);
   }
 
-  const getPlaylists = async (token: string, userId: string) => {
+  const getPlaylists = async (userId: string) => {
+    if (!userId) return;
     const { data } = await axios.get(`https://api.spotify.com/v1/users/${userId}/playlists`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
       }
     });
-    setUserPlaylists(data);
+    setUserPlaylists(data.items);
   }
   const auth = !token ? <Login /> : 
     <>
@@ -66,7 +66,7 @@ function App() {
       <Contianer>
         <TrackView><TrackInfo />
         </TrackView>
-        <Side><Sidebar userPlaylists={userPlaylists} /></Side>
+        <Side><Sidebar playlists={userPlaylists} /></Side>
       </Contianer>
     </>;
 

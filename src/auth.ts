@@ -43,13 +43,7 @@ export async function getAccessToken(clientId: string, code: string): Promise<st
     params.append("code", code);
     params.append("redirect_uri", "http://localhost:5173/callback");
     params.append("code_verifier", verifier!);
-    // 
-    console.log("Sending token request with:", {
-        client_id: clientId,
-        code,
-        code_verifier: verifier,
-        redirect_uri: "http://localhost:5173/callback"
-    });
+
     const result = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
