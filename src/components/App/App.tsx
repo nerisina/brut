@@ -1,16 +1,20 @@
 import './App.css';
 import Login from '../Login/Login';
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TrackInfo from '../TrackInfo/TrackInfo';
 import { getAccessToken } from '../../auth';
 import axios from 'axios';
 import Nav from '../Nav/Nav';
+import { Sidebar } from '../Sidebar/Sidebar';
+import { Contianer, TrackView, Side } from './styles';
 
 function App() {
   const hasRun = useRef(false);
 
   const [token, setToken] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
 
   // useRef to track if the effect has run to prevent multiple executions
   // This is useful to ensure that the token retrieval logic runs only once 
@@ -25,8 +29,9 @@ function App() {
     }
     if(token){
       getUserInfo(token);
+      getPlaylists(token, userId);
     }
-   }, [token]);
+   }, [token, userId]);
 
   const getToken = async () => {
     if (code) {
@@ -42,12 +47,28 @@ function App() {
         "Content-Type": "application/json"
       }
     });
-    console.log("Spotify User Info Response:", data);
-    console.log("Images array:", data.images);
-    console.log("Token used:", token);
+    setUserId(data.id);
     setUserInfo(data.images[0]?.url || null);
   }
-  const auth = !token ? <Login /> : <><Nav userInfo={userInfo} isLoggedIn={!!token}/><TrackInfo /></>;
+
+  const getPlaylists = async (token: string, userId: string) => {
+    const { data } = await axios.get(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    setUserPlaylists(data);
+  }
+  const auth = !token ? <Login /> : 
+    <>
+      <Nav userInfo={userInfo} isLoggedIn={!!token} />
+      <Contianer>
+        <TrackView><TrackInfo />
+        </TrackView>
+        <Side><Sidebar userPlaylists={userPlaylists} /></Side>
+      </Contianer>
+    </>;
 
   return <>{auth}</>;
 }
