@@ -14,6 +14,8 @@ function App() {
   const [userInfo, setUserInfo] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<any[]>([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
+  const [tracks, setTracks] = useState<any[]>([]);
 
   // useRef to track if the effect has run to prevent multiple executions
   // This is useful to ensure that the token retrieval logic runs only once 
@@ -28,9 +30,15 @@ function App() {
     }
     if(token){
       getUserInfo(token);
-      getPlaylists(userId);
+      if(userId){
+        getPlaylists(userId);
+      }
+      if (selectedPlaylist) {
+        getTracks(selectedPlaylist);
+      }
     }
-   }, [token, userId]);
+      console.log("🎵 Tracks fetched:", selectedPlaylist);
+   }, [token, userId, selectedPlaylist]);
 
   const getToken = async () => {
     if (code) {
@@ -60,13 +68,28 @@ function App() {
     });
     setUserPlaylists(data.items);
   }
+
+  const getTracks = async (playlistId: string) => {
+    const { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    console.log(data.items);
+    setTracks(data.items);
+  }
+
   const auth = !token ? <Login /> : 
     <>
       <Nav userInfo={userInfo} isLoggedIn={!!token} />
       <Contianer>
-        <TrackView><TrackInfo />
+        <TrackView>
+          <TrackInfo  tracks={tracks}/>
         </TrackView>
-        <Side><Sidebar playlists={userPlaylists} /></Side>
+
+        <Side>
+          <Sidebar playlists={userPlaylists} onSelectedPlaylist={setSelectedPlaylist} /></Side>
       </Contianer>
     </>;
 
