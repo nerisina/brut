@@ -5,6 +5,7 @@ const TrackInfo = ({ tracks }: TrackInfoProps) => {
     return ( 
         <div>
             {tracks?.map((track) => (
+                
                 <div key={track.track.id} className="track-info">
                     <img src={track.track.album.images[0].url} alt={track.track.name} />
                     <div className="track-details">
