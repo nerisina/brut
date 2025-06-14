@@ -1,3 +1,4 @@
+import { getByDisplayValue } from '@testing-library/react';
 import { useEffect, useState } from 'react';
 type ControlsProps = {
     token: string;
@@ -19,7 +20,7 @@ const initialTrack = {
 
 
 const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
-    const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);;
+    const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
     const [is_paused, setPaused] = useState(false);
     const [is_active, setActive] = useState(false);
     const [current_track, setTrack] = useState<SpotifyTrack>(tracks?.[0] || initialTrack);
@@ -45,10 +46,12 @@ const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
             });
 
             setPlayer(player);
+
             player.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id);
                 onDeviceReady?.(device_id);
             });
+
             player.addListener('player_state_changed', (state => {
                 if (!state) {
                     return;
@@ -64,7 +67,6 @@ const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
                 console.log('Device ID has gone offline', device_id);
             });
 
-
             player.connect();
 
         };
@@ -74,7 +76,7 @@ return (
     <div>
         <button
             className="btn-spotify"
-            onClick={() => { if (player) player.previousTrack(); }}
+            onClick={async () => { if (player) await player.previousTrack(); }}
             disabled={!player}
         >
             &lt;&lt;
@@ -82,7 +84,7 @@ return (
 
         <button
             className="btn-spotify"
-            onClick={() => { if (player) player.togglePlay(); }}
+            onClick={async () => { if (player) await player.togglePlay(); }}
             disabled={!player}
         >
             {is_paused ? "PLAY" : "PAUSE"}
@@ -90,24 +92,24 @@ return (
 
         <button
             className="btn-spotify"
-            onClick={() => { if (player) player.nextTrack(); }}
+            onClick={async () => { if (player) await player.nextTrack(); }}
             disabled={!player}
         >
             &gt;&gt;
         </button>
 
-        <div className="container">
+        <div className="container" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
             <div className="main-wrapper">
-                <img src={current_track.album.images[0].url}
-                    className="now-playing__cover" alt="" />
+                <img src={current_track?.album.images[0].url}
+                    className="now-playing__cover" alt="" width={50} height={50} />
 
                 <div className="now-playing__side">
                     <div className="now-playing__name">
-                        {current_track.name}
+                        {current_track?.name}
                     </div>
 
                     <div className="now-playing__artist">
-                        {current_track.artists[0].name}
+                        {current_track?.artists[0].name}
                     </div>
                 </div>
             </div>

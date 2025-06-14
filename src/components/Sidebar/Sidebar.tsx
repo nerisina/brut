@@ -14,21 +14,21 @@ const Sidebar = ({ playlists, onSelectedPlaylist, token, tracks, onDeviceReady }
         const selectedPlaylist = e.target.value;
         onSelectedPlaylist?.(selectedPlaylist);
     };
-    console.log("🔐 Token received in Sidebar:", token);
+    
     function setDeviceId(deviceId: string): void {
-        throw new Error("Function not implemented.");
+        onDeviceReady(deviceId);
     }
 
     return(
         <>
-            <Controls token={token} tracks={tracks} onDeviceReady={onDeviceReady} />
-            <select id="sidebar-playlist-select" onChange={handlePlaylistChange}>
-                {playlists.map((playList) => (
-                    <option key={playList.id} value={playList.id}>
-                        {playList.name}
-                    </option>
-                ))}
-            </select>
+            <Controls token={token} tracks={tracks} onDeviceReady={setDeviceId} />
+        <select id="sidebar-playlist-select" onChange={handlePlaylistChange}>
+            {playlists.map((playList) => (
+                <option key={playList.id} value={playList.id}>
+                    {playList.name}
+                </option>
+            ))}
+        </select>
         </>
     )
 };

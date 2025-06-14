@@ -31,7 +31,10 @@ function App() {
     }
     if(token){
       getUserInfo(token);
-      playTrack()
+      console.log("selectedPlaylist:", selectedPlaylist);
+      if (deviceId && selectedPlaylist) {
+        playTrack();
+      }
 
       if(userId){
         getPlaylists(userId);
@@ -68,6 +71,7 @@ function App() {
         "Content-Type": "application/json"
       }
     });
+    console.log("Playlists:", data.items);
     setUserPlaylists(data.items);
   }
 
@@ -78,18 +82,43 @@ function App() {
         "Content-Type": "application/json"
       }
     });
-    setTracks(data.items);
+    
+    // Filter out items with null track
+    const validTracks = data.items.filter((item: any) => item.track?.uri);
+    setTracks(validTracks);
   }
 
-  const playTrack = async (trackUri: string) => {
+  const transferPlayback = async () => {
+    if(!deviceId || !token) return;
+    await fetch(`https://api.spotify.com/v1/me/player`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        device_ids: [deviceId],
+        play: true
+      }),
+    }); 
+  }
+
+  const playTrack = async () => {
+    await transferPlayback();
+    const playlistUri = `spotify:playlist:${selectedPlaylist}`;
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ uris: [trackUri] }),
+      body: JSON.stringify({ 
+        context_uri: playlistUri, // 🎯 VERY IMPORTANT
+        offset: { position: 0 },
+        position_ms: 0
+      }),
     });
+    
   };
 
   const auth = !token ? <Login /> : 
