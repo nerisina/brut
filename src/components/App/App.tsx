@@ -17,33 +17,44 @@ function App() {
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
   const [tracks, setTracks] = useState<any[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-
+  const [currentTrack, setCurrentTrack] = useState<any | null>(null);
   // useRef to track if the effect has run to prevent multiple executions
   // This is useful to ensure that the token retrieval logic runs only once 
   const clientId = import.meta.env.VITE_CLIENT_ID;
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code"); 
 
+  // Separate useEffects for better sequencing and clarity
   useEffect(() => {
     if (!hasRun.current && code && !token) {
-      hasRun.current = true; // Set the flag to true to prevent re-running 
+      hasRun.current = true;
       getToken();
     }
-    if(token){
-      getUserInfo(token);
-      console.log("selectedPlaylist:", selectedPlaylist);
-      if (deviceId && selectedPlaylist) {
-        playTrack();
-      }
+  }, [code, token]);
 
-      if(userId){
-        getPlaylists(userId);
-      }
-      if (selectedPlaylist) {
-        getTracks(selectedPlaylist);
-      }
+  useEffect(() => {
+    if (token) {
+      getUserInfo(token);
     }
-   }, [token, userId, selectedPlaylist]);
+  }, [token]);
+
+  useEffect(() => {
+    if (userId && token) {
+      getPlaylists(userId);
+    }
+  }, [userId, token]);
+
+  useEffect(() => {
+    if (selectedPlaylist && token) {
+      getTracks(selectedPlaylist);
+    }
+  }, [selectedPlaylist, token]);
+
+  useEffect(() => {
+    if (token && selectedPlaylist && deviceId) {
+      playTrack();
+    }
+  }, [token, selectedPlaylist, deviceId]);
 
   const getToken = async () => {
     if (code) {
@@ -71,7 +82,6 @@ function App() {
         "Content-Type": "application/json"
       }
     });
-    console.log("Playlists:", data.items);
     setUserPlaylists(data.items);
   }
 
@@ -86,6 +96,7 @@ function App() {
     // Filter out items with null track
     const validTracks = data.items.filter((item: any) => item.track?.uri);
     setTracks(validTracks);
+    getCurrentTrack();
   }
 
   const transferPlayback = async () => {
@@ -113,7 +124,7 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        context_uri: playlistUri, // 🎯 VERY IMPORTANT
+        context_uri: playlistUri,
         offset: { position: 0 },
         position_ms: 0
       }),
@@ -121,12 +132,13 @@ function App() {
     
   };
 
+
   const auth = !token ? <Login /> : 
     <>
       <Nav userInfo={userInfo} isLoggedIn={!!token} />
       <Contianer>
         <TrackView>
-          <TrackInfo tracks={tracks}/>
+          <TrackInfo currentTrack={currentTrack} />
         </TrackView>
 
         <Side>
@@ -135,7 +147,8 @@ function App() {
             onSelectedPlaylist={setSelectedPlaylist} 
             token={token} 
             tracks={tracks} 
-            onDeviceReady={setDeviceId} />
+            onDeviceReady={setDeviceId}
+            onCurrentTrackChange={setCurrentTrack} />
         </Side>
       </Contianer>
     </>;

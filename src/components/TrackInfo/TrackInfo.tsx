@@ -1,18 +1,12 @@
 interface TrackInfoProps {
-    tracks?: any[]
+    currentTrack: any
 }
-const TrackInfo = ({ tracks }: TrackInfoProps) => {   
-    return ( 
+const TrackInfo = ({ currentTrack }: TrackInfoProps) => {
+
+    return (
         <div>
-            {tracks?.map((track) => (
-                
-                <div key={track.track.id} className="track-info">
-                    <img src={track.track.album.images[0].url} alt={track.track.name} />
-                    <div className="track-details">
-                        <h3>{track.track.name}</h3>
-                    </div>
-                </div>
-            ))}
+            <h1>{currentTrack?.name || "No track selected"}</h1>
+            <h3>Artist: {currentTrack?.artists[0]?.name || "Unknown Artist"} : {currentTrack?.album?.name || "Unknown Album"}</h3>  
         </div>
     );
 }

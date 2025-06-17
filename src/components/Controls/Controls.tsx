@@ -1,12 +1,14 @@
-import { getByDisplayValue } from '@testing-library/react';
 import { useEffect, useState } from 'react';
-type ControlsProps = {
-    token: string;
-    tracks?: any[];
-    onDeviceReady?: (deviceId: string) => void;
+
+type Track = {
+    name: string;
+    album: {
+        images: { url: string }[];
+    };
+    artists: { name: string }[];
 };
 
-const initialTrack = {
+const initialTrack: Track = {
     name: "",
     album: {
         images: [
@@ -16,14 +18,22 @@ const initialTrack = {
     artists: [
         { name: "" }
     ]
-}
+};
+
+type ControlsProps = {
+    token: string;
+    tracks?: any[];
+    onDeviceReady?: (deviceId: string) => void;
+    onCurrentTrackChange?: (track: Track) => void;
+};
 
 
-const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
+
+const Controls = ({ token, onDeviceReady, tracks, onCurrentTrackChange }: ControlsProps) => {
     const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
-    const [is_paused, setPaused] = useState(false);
-    const [is_active, setActive] = useState(false);
-    const [current_track, setTrack] = useState<SpotifyTrack>(tracks?.[0] || initialTrack);
+    const [isPaused, setPaused] = useState<boolean>(false);
+    const [isActive, setActive] = useState<boolean>(false);
+    const [currentTrack, setTrack] = useState<Track>(tracks?.[0] || initialTrack);
     
     useEffect(() => {
 
@@ -48,7 +58,6 @@ const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
             setPlayer(player);
 
             player.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID', device_id);
                 onDeviceReady?.(device_id);
             });
 
@@ -61,11 +70,13 @@ const Controls = ({token, onDeviceReady, tracks}: ControlsProps) => {
                 player.getCurrentState().then(state => {
                     setActive(!!state);
                 });
+                onCurrentTrackChange?.(state.track_window.current_track);
             }));
 
             player.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
             });
+
 
             player.connect();
 
@@ -87,7 +98,7 @@ return (
             onClick={async () => { if (player) await player.togglePlay(); }}
             disabled={!player}
         >
-            {is_paused ? "PLAY" : "PAUSE"}
+            {isPaused ? "PLAY" : "PAUSE"}
         </button>
 
         <button
@@ -97,25 +108,9 @@ return (
         >
             &gt;&gt;
         </button>
-
-        <div className="container" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-            <div className="main-wrapper">
-                <img src={current_track?.album.images[0].url}
-                    className="now-playing__cover" alt="" width={50} height={50} />
-
-                <div className="now-playing__side">
-                    <div className="now-playing__name">
-                        {current_track?.name}
-                    </div>
-
-                    <div className="now-playing__artist">
-                        {current_track?.artists[0].name}
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 )
 
 }
 export default Controls;
+
