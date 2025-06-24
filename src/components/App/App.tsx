@@ -5,7 +5,7 @@ import { getAccessToken } from '../../auth';
 import axios from 'axios';
 import Nav from '../Nav/Nav';
 import Sidebar from '../Sidebar/Sidebar';
-import { Contianer, TrackView, Side } from './styles';
+import { Container, TrackView, Side } from './styles';
 
 function App() {
   const hasRun = useRef(false);
@@ -136,7 +136,7 @@ function App() {
   const auth = !token ? <Login /> : 
     <>
       <Nav userInfo={userInfo} isLoggedIn={!!token} />
-      <Contianer>
+      <Container>
         <TrackView>
           <TrackInfo currentTrack={currentTrack} />
         </TrackView>
@@ -150,7 +150,7 @@ function App() {
             onDeviceReady={setDeviceId}
             onCurrentTrackChange={setCurrentTrack} />
         </Side>
-      </Contianer>
+      </Container>
     </>;
 
   return <>{auth}</>;

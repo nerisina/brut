@@ -1,11 +1,11 @@
 import styled from "styled-components";
 
 export const NavContainer = styled.div`
-display: flex;
-align-items: center;
-width: 100%;
-margin-top: 20px;
-justify-content: space-between;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    justify-content: space-between;
+    padding: 0 20px;
 `
 
 export const UserAvatar = styled.div`

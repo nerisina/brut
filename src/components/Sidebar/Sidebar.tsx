@@ -1,5 +1,5 @@
 import Controls from "../Controls/Controls";
-
+import { SidebarContainer } from "./styles";
 interface SidebarProps {
     playlists: any[]; // Expecting an array of playlist names or IDs
     onSelectedPlaylist: (playlistId: string) => void; // Optional callback for when a playlist is selected
@@ -20,7 +20,7 @@ const Sidebar = ({ playlists, onSelectedPlaylist, token, tracks, onDeviceReady, 
     };
 
     return (
-        <>
+        <SidebarContainer>
             <Controls token={token} tracks={tracks} onDeviceReady={setDeviceId} onCurrentTrackChange={onCurrentTrackChange} />            
             <select id="sidebar-playlist-select" onChange={handlePlaylistChange}>
                 {playlists.map((playList) => (
@@ -30,7 +30,7 @@ const Sidebar = ({ playlists, onSelectedPlaylist, token, tracks, onDeviceReady, 
                 ))}
             </select>
             <img src={tracks[0]?.track.album.images[0].url} alt={tracks[0]?.track.name} />
-        </>
+        </SidebarContainer>
     )
 };
 export default Sidebar
