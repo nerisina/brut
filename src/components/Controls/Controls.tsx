@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import { ControlsContainer, PlaylistButton } from './Controls.styles';
 type Track = {
     name: string;
     album: {
@@ -84,31 +84,28 @@ const Controls = ({ token, onDeviceReady, tracks, onCurrentTrackChange }: Contro
     }, [token]);
     
 return (
-    <div>
-        <button
-            className="btn-spotify"
+    <ControlsContainer>
+        <PlaylistButton
             onClick={async () => { if (player) await player.previousTrack(); }}
             disabled={!player}
         >
             &lt;&lt;
-        </button>
+        </PlaylistButton>
 
-        <button
-            className="btn-spotify"
+        <PlaylistButton
             onClick={async () => { if (player) await player.togglePlay(); }}
             disabled={!player}
         >
-            {isPaused ? "PLAY" : "PAUSE"}
-        </button>
+            {isPaused ? ">" : "||"}
+        </PlaylistButton>
 
-        <button
-            className="btn-spotify"
+        <PlaylistButton
             onClick={async () => { if (player) await player.nextTrack(); }}
             disabled={!player}
         >
             &gt;&gt;
-        </button>
-    </div>
+        </PlaylistButton>
+    </ControlsContainer>
 )
 
 }
